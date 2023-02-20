@@ -20,19 +20,22 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/truck_owner/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phoneNumber,
-          email,
-          password,
-          role: 3,
-        }),
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${process.env.REACT_APP_API_HOST}/truck_owner/signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phoneNumber,
+            email,
+            password,
+            role: 3,
+          }),
+          credentials: "include",
+        }
+      );
       const data = await res.json();
       setLoading(false);
 

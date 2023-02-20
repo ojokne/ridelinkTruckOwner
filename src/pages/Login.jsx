@@ -31,7 +31,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/login", {
+      const res = await fetch(`${process.env.REACT_APP_API_HOST}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -54,7 +54,7 @@ const Login = () => {
           id: data.id,
         });
 
-        navigate("/add_truck");
+        navigate("/");
         setAlert((prev) => {
           return { ...prev, alert: false, message: "" };
         });

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Loader from "../components/Loader";
+import Loader from "./Loader";
 import { useAuthentication } from "../context/StateProvider";
 import useAuth from "../utils/useAuth";
 
@@ -22,7 +22,7 @@ const AddTruck = () => {
     if (auth.isAuthenticated) {
       try {
         const res = await fetch(
-          `http://localhost:5000/truck_owner/add_truck/${auth.id}`,
+          `${process.env.REACT_APP_API_HOST}/truck_owner/add_truck/${auth.id}`,
           {
             method: "POST",
             headers: {
@@ -93,6 +93,9 @@ const AddTruck = () => {
   }
   return (
     <div>
+      <div className="mx-3 pt-3 lead text-muted">
+        <span>Add Truck</span>
+      </div>
       {alert.alert && (
         <div className="mx-auto" style={{ width: "340px" }}>
           <div className={alert.class} role="alert">
@@ -107,10 +110,6 @@ const AddTruck = () => {
         </div>
       )}
       <div className="mx-auto" style={{ width: "340px" }}>
-        <p className="text-center text-muted">
-          Please give us your details about the truck
-        </p>
-
         <form className="border rounded">
           <div className="m-3">
             <label htmlFor="regNumber" className="form-label">
