@@ -1,4 +1,4 @@
-import { FaTasks, FaTruck } from "react-icons/fa";
+import { FaTasks, FaTruckMoving } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const DesktopMenu = () => {
@@ -14,10 +14,18 @@ const DesktopMenu = () => {
           </li>
         </Link>
 
+        <Link className="text-decoration-none" to="trucks">
+          <li className="py-2 border-bottom liMenu">
+            <span>
+              <FaTruckMoving className="icon iconMenu" />
+            </span>
+            <span className="text-muted">Trucks</span>
+          </li>
+        </Link>
         <Link className="text-decoration-none" to="add_truck">
           <li className="py-2 border-bottom liMenu">
             <span>
-              <FaTruck className="icon iconMenu" />
+              <FaTruckMoving className="icon iconMenu" />
             </span>
             <span className="text-muted">Add Truck</span>
           </li>

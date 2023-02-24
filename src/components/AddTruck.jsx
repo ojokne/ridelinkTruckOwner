@@ -1,11 +1,9 @@
 import { useState } from "react";
 import Loader from "./Loader";
-import { useAuthentication } from "../context/StateProvider";
 import useAuth from "../utils/useAuth";
 
 const AddTruck = () => {
-  useAuth();
-  const { auth } = useAuthentication();
+  let id = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [regNumber, setregNumber] = useState("");
@@ -19,10 +17,10 @@ const AddTruck = () => {
   const handleAddTruck = async (e) => {
     e.preventDefault();
     setLoading(true);
-    if (auth.isAuthenticated) {
+    if (id) {
       try {
         const res = await fetch(
-          `${process.env.REACT_APP_API_HOST}/truck_owner/add_truck/${auth.id}`,
+          `${process.env.REACT_APP_API_HOST}/truck_owner/add_truck/${id}`,
           {
             method: "POST",
             headers: {
@@ -36,7 +34,6 @@ const AddTruck = () => {
           }
         );
         const data = await res.json();
-        console.log(data);
         setLoading(false);
 
         if (data.isCreated) {
@@ -96,57 +93,61 @@ const AddTruck = () => {
       <div className="mx-3 pt-3 lead text-muted">
         <span>Add Truck</span>
       </div>
-      {alert.alert && (
-        <div className="mx-auto" style={{ width: "340px" }}>
-          <div className={alert.class} role="alert">
-            {alert.message}
-            <button
-              type="button"
-              className="btn-close"
-              data-bs-dismiss="alert"
-              aria-label="Close"
-            ></button>
+      <div className="mx-auto" style={{ maxWidth: "500px" }}>
+        <div className="bg-white rounded  shadow-sm m-3 p-3">
+          {alert.alert && (
+            <div className={alert.class} role="alert">
+              {alert.message}
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+          )}
+          <div className="mx-auto" style={{ width: "340px" }}>
+            <p className="text-center text-muted">Enter the truck details</p>
+
+            <form>
+              <div className="m-3">
+                <label htmlFor="regNumber" className="form-label">
+                  Registration Number
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="regNumber"
+                  placeholder="UBA123X"
+                  value={regNumber}
+                  required
+                  onChange={(e) => setregNumber(e.target.value)}
+                />
+              </div>
+              <div className="m-3">
+                <label htmlFor="weight" className="form-label">
+                  Weight (Tonnes)
+                </label>
+                <input
+                  type="number"
+                  className="form-control"
+                  id="weight"
+                  value={weight}
+                  placeholder="12"
+                  required
+                  onChange={(e) => setWeight(e.target.value)}
+                />
+              </div>
+              <button
+                type="submit"
+                className="m-3 btn ridelink-background text-white"
+                onClick={(e) => handleAddTruck(e)}
+              >
+                Add my Truck
+              </button>
+            </form>
           </div>
         </div>
-      )}
-      <div className="mx-auto" style={{ width: "340px" }}>
-        <form className="border rounded">
-          <div className="m-3">
-            <label htmlFor="regNumber" className="form-label">
-              Registration Number
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="regNumber"
-              placeholder="UBA123X"
-              value={regNumber}
-              required
-              onChange={(e) => setregNumber(e.target.value)}
-            />
-          </div>
-          <div className="m-3">
-            <label htmlFor="weight" className="form-label">
-              Weight (Tonnes)
-            </label>
-            <input
-              type="number"
-              className="form-control"
-              id="weight"
-              value={weight}
-              placeholder="12"
-              required
-              onChange={(e) => setWeight(e.target.value)}
-            />
-          </div>
-          <button
-            type="submit"
-            className="m-3 btn ridelink-background text-white"
-            onClick={(e) => handleAddTruck(e)}
-          >
-            Add my Truck
-          </button>
-        </form>
       </div>
     </div>
   );

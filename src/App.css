@@ -10,11 +10,15 @@
   }
 }
 
+body {
+  background-color: rgb(250, 250, 250);
+}
+
+.ridelink-background-light {
+  background-color: rgb(250, 250, 250);
+}
 .ridelink-background {
   background-color: #32a885;
-}
-.text- .card:hover {
-  background-color: #e8edec;
 }
 
 .icon {
@@ -29,7 +33,6 @@
 .ridelink-color {
   color: #32a885;
 }
-
 .iconSmall {
   color: white;
   background-color: #32a885;
@@ -56,19 +59,15 @@
   transform: scale(0.98);
 }
 
-.ridelink-badge {
-  padding: 6px;
-  margin: 6px;
-  background-color: #32a885;
-  color: white;
-  border-radius: 50%;
-  font-size: 30px;
-}
 .centered {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.order-card:hover {
+  background-color: rgb(250, 250, 250);
 }
 
 .fixed-left {
@@ -78,4 +77,10 @@
 .liMenu:hover {
   background-color: rgb(250, 250, 250);
   transform: scale(0.95);
+}
+
+logoutBtn:hover {
+  background-color: rgb(250, 250, 250);
+  transform: scale(0.9);
+  border-radius: 6px;
 }

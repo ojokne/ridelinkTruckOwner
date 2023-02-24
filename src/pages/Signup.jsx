@@ -78,29 +78,29 @@ const Signup = () => {
   }
 
   return (
-    <div className="container">
-      <Logo />
-      {alert.alert && (
-        <div className="mx-auto" style={{ width: "340px" }}>
-          <div
-            className="alert alert-danger alert-dismissible fade show"
-            role="alert"
-          >
-            {alert.message}
-            <button
-              type="button"
-              className="btn-close"
-              data-bs-dismiss="alert"
-              aria-label="Close"
-            ></button>
+    <div className="mx-auto" style={{ maxWidth: "500px" }}>
+      <div className="bg-white rounded  shadow-sm m-3 p-3">
+        <Logo />
+        {alert.alert && (
+          <div className="mx-auto" style={{ width: "340px" }}>
+            <div
+              className="alert alert-danger alert-dismissible fade show"
+              role="alert"
+            >
+              {alert.message}
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="mx-auto" style={{ width: "340px" }}>
         <p className="text-center text-muted">Please give us your details</p>
 
-        <form className="border rounded">
+        <form>
           <div className="m-3">
             <label htmlFor="phone" className="form-label">
               Phone
@@ -167,7 +167,7 @@ const Signup = () => {
           </button>
         </form>
         <div className="mt-3">
-          <Link to="/login" className="text-decoration-none ridelink-color">
+          <Link to="login" className="text-decoration-none ridelink-color">
             Login to my account
           </Link>
         </div>

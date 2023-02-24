@@ -1,13 +1,9 @@
-import { FaCheck, FaClock, FaSignOutAlt, FaTasks } from "react-icons/fa";
-import { useAuthentication } from "../context/StateProvider";
+import { FaSignOutAlt, FaTasks, FaTruckMoving } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { ACTIONS } from "../context/actions";
 
-const MobileMenu = () => {
+const MobileMenu = ({ handleShowMenu }) => {
   const navigate = useNavigate();
-
-  const { authDispatch } = useAuthentication();
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -22,7 +18,7 @@ const MobileMenu = () => {
       });
       const data = await res.json();
       if (data.isLoggedOut) {
-        authDispatch({ type: ACTIONS.LOGOUT });
+        sessionStorage.removeItem("id");
         navigate("/login");
       }
     } catch (e) {
@@ -32,7 +28,11 @@ const MobileMenu = () => {
   return (
     <div className="py-1">
       <ul className="p1 m-1 list-unstyled">
-        <Link className="text-decoration-none" to="/">
+        <Link
+          className="text-decoration-none"
+          to="/"
+          onClick={() => handleShowMenu()}
+        >
           <li className="py-2 border-bottom liMenu d-flex justify-content-between align-items-center">
             <span className="text-muted">Dashboard</span>
             <span>
@@ -41,22 +41,27 @@ const MobileMenu = () => {
           </li>
         </Link>
 
-        <Link className="text-decoration-none" to="confirmed">
+        <Link
+          className="text-decoration-none"
+          to="trucks"
+          onClick={() => handleShowMenu()}
+        >
           <li className="py-2 border-bottom d-flex align-items-center liMenu d-flex justify-content-between align-items-center">
-            <span className="text-muted">Confirmed</span>
+            <span className="text-muted">Trucks</span>
             <span>
-              <FaCheck className="icon iconMenu" />
+              <FaTruckMoving className="icon iconMenu" />
             </span>
           </li>
         </Link>
-        <Link className="text-decoration-none" to="pending">
+        <Link
+          className="text-decoration-none"
+          to="add_truck"
+          onClick={() => handleShowMenu()}
+        >
           <li className="py-2 border-bottom d-flex align-items-center liMenu d-flex justify-content-between align-items-center">
-            <span className="text-muted">Pending</span>
+            <span className="text-muted">Add Truck</span>
             <span>
-              <FaClock
-                className="icon iconMenu"
-                style={{ backgroundColor: "#ffc107" }}
-              />
+              <FaTruckMoving className="icon iconMenu" />
             </span>
           </li>
         </Link>
