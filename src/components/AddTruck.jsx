@@ -106,10 +106,9 @@ const AddTruck = () => {
               ></button>
             </div>
           )}
-          <div className="mx-auto" style={{ width: "340px" }}>
-            <p className="text-center text-muted">Enter the truck details</p>
-
+          <div>
             <form>
+              <p className="text-center text-muted">Enter the truck details</p>
               <div className="m-3">
                 <label htmlFor="regNumber" className="form-label">
                   Registration Number
@@ -121,7 +120,7 @@ const AddTruck = () => {
                   placeholder="UBA123X"
                   value={regNumber}
                   required
-                  onChange={(e) => setregNumber(e.target.value)}
+                  onChange={(e) => setregNumber(e.target.value.toUpperCase())}
                 />
               </div>
               <div className="m-3">
