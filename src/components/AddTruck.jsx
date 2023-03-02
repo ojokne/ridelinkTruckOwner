@@ -1,9 +1,11 @@
 import { useState } from "react";
+import useId from "../utils/useId";
+import useToken from "../utils/useToken";
 import Loader from "./Loader";
-import useAuth from "../utils/useAuth";
 
 const AddTruck = () => {
-  let id = useAuth();
+  const id = useId();
+  const token = useToken();
 
   const [loading, setLoading] = useState(false);
   const [regNumber, setregNumber] = useState("");
@@ -25,12 +27,12 @@ const AddTruck = () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              Authorization: token,
             },
             body: JSON.stringify({
               regNumber,
               weight,
             }),
-            credentials: "include",
           }
         );
         const data = await res.json();

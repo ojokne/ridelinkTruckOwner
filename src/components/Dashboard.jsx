@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import useAuth from "../utils/useAuth";
 import { Link } from "react-router-dom";
 import Loader from "./Loader";
 import { FaTruckMoving } from "react-icons/fa";
 import { useData } from "../context/StateProvider";
 import { ACTIONS } from "../context/actions";
+import useId from "../utils/useId";
+import useToken from "../utils/useToken";
 
 const Dashboard = () => {
-  let id = useAuth();
+  const id = useId();
+  const token = useToken();
   const { dataDispatch } = useData();
   const [loading, setLoading] = useState(false);
   const [trucks, setTrucks] = useState(0);
@@ -23,8 +25,10 @@ const Dashboard = () => {
           `${process.env.REACT_APP_API_HOST}/truck_owner/trucks/${id}`,
           {
             method: "GET",
-            credentials: "include",
-            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
           }
         );
         const data = await res.json();
