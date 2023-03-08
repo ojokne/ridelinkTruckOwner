@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { FaCheck, FaClock, FaTruckMoving } from "react-icons/fa";
 import { useData } from "../context/StateProvider";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../config/firebase";
+import Loader from "./Loader";
 
 const styles = {
   iconLarge: {
@@ -22,48 +25,61 @@ const Trucks = () => {
   const navigate = useNavigate();
   const [trucks, setTrucks] = useState([]);
   const [display, setDisplay] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // useEffect(() => {
+  //   if (data.hasOwnProperty("data")) {
+  //     if (data.data.length) {
+  //       for (let i = 0; i < data.data.length; i++) {
+  //         let element = null;
+  //         let truck = data.data[i].truck;
+  //         let str = String(truck.regNumber).toUpperCase();
+  //         let first = str.substring(0, 3);
+  //         let second = str.substring(3, 6);
+  //         let third = str.substring(6);
+  //         let regNumber = `${first} - ${second} - ${third}`;
+  //         if (truck.isAvailable) {
+  //           element = (
+  //             <span className="d-flex align-items-center">
+  //               <FaCheck className="iconSmall" />
+  //               <span className="text-muted">Available</span>
+  //             </span>
+  //           );
+  //         } else {
+  //           element = (
+  //             <span>
+  //               <FaClock
+  //                 className="iconSmall"
+  //                 style={{ backgroundColor: "#ffc107" }}
+  //               />
+  //               <span className="text-muted">On trip</span>
+  //             </span>
+  //           );
+  //         }
+  //         let obj = {
+  //           regNumber,
+  //           weight: truck.weight,
+  //           element,
+  //         };
+  //         setTrucks((prev) => [...prev, obj]);
+  //       }
+  //       setDisplay(true);
+  //     }
+  //   }
+  // }, [data, navigate]);
 
   useEffect(() => {
-    if (data.hasOwnProperty("data")) {
-      if (data.data.length) {
-        for (let i = 0; i < data.data.length; i++) {
-          let element = null;
-          let truck = data.data[i].truck;
-          let str = String(truck.regNumber).toUpperCase();
-          let first = str.substring(0, 3);
-          let second = str.substring(3, 6);
-          let third = str.substring(6);
-          let regNumber = `${first} - ${second} - ${third}`;
-          if (truck.isAvailable) {
-            element = (
-              <span className="d-flex align-items-center">
-                <FaCheck className="iconSmall" />
-                <span className="text-muted">Available</span>
-              </span>
-            );
-          } else {
-            element = (
-              <span>
-                <FaClock
-                  className="iconSmall"
-                  style={{ backgroundColor: "#ffc107" }}
-                />
-                <span className="text-muted">On trip</span>
-              </span>
-            );
-          }
-          let obj = {
-            regNumber,
-            weight: truck.weight,
-            element,
-          };
-          setTrucks((prev) => [...prev, obj]);
-        }
-        setDisplay(true);
+    onAuthStateChanged(auth, (user) => {
+      setLoading(false);
+      if (!user) {
+        navigate("/login");
       }
-    }
-  }, [data, navigate]);
+    });
+  }, [navigate]);
 
+  if (loading) {
+    return <Loader loading={loading} description="Please wait" />;
+  }
   return (
     <div>
       <div className="mx-3 pt-3 lead text-muted">

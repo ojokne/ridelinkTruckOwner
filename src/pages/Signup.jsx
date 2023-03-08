@@ -1,12 +1,23 @@
-import { useRef, useState } from "react";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import Logo from "../components/Logo";
+import { auth } from "../config/firebase";
 
 const Signup = () => {
   const showPasswordRef = useRef();
-  const phoneRef = useRef();
-  const emailRef = useRef();
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [phoneError, setPhoneError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [emailError, setEmailError] = useState("");
+
   const passwordRef = useRef();
   const navigate = useNavigate();
   const [alert, setAlert] = useState({
@@ -15,48 +26,92 @@ const Signup = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  const handleSignup = async (e, phoneNumber, email, password) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    setLoading(true);
+
+    // try {
+    //   const res = await fetch(
+    //     `${process.env.REACT_APP_API_HOST}/truck_owner/signup`,
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify({
+    //         phoneNumber,
+    //         email,
+    //         password,
+    //         role: 3,
+    //       }),
+    //     }
+    //   );
+    //   const data = await res.json();
+    //   setLoading(false);
+
+    //   if (data.isCreated) {
+    //     navigate("/login");
+    //     setAlert((prev) => {
+    //       return { ...prev, alert: false, message: "" };
+    //     });
+    //   } else {
+    //     setAlert((prev) => {
+    //       return { ...prev, alert: true, message: data.msg };
+    //     });
+    //   }
+    // } catch {
+    //   console.log("An error occured");
+    //   setAlert((prev) => {
+    //     return {
+    //       ...prev,
+    //       alert: true,
+    //       message: "An error occurred, Please try again",
+    //     };
+    //   });
+    // }
+
+    if (phone.length < 10) {
+      setPhoneError("Should be atleast 10 characters");
+      return;
+    }
+
+    if (!email.length) {
+      setEmailError("Email cannot be empty");
+      return;
+    }
+
+    if (password.length < 6) {
+      setPasswordError("Password should be atleast 6 characters");
+      return;
+    }
 
     try {
-      const res = await fetch(
-        `${process.env.REACT_APP_API_HOST}/truck_owner/signup`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phoneNumber,
-            email,
-            password,
-            role: 3,
-          }),
-        }
-      );
-      const data = await res.json();
+      setLoading(true);
+      await createUserWithEmailAndPassword(auth, email, password);
       setLoading(false);
+      navigate("/");
+    } catch (e) {
+      setLoading(false);
+      console.log(e.code);
+      const errorCode = e.code;
 
-      if (data.isCreated) {
-        navigate("/login");
-        setAlert((prev) => {
-          return { ...prev, alert: false, message: "" };
-        });
-      } else {
-        setAlert((prev) => {
-          return { ...prev, alert: true, message: data.msg };
-        });
+      switch (errorCode) {
+        case "auth/email-already-in-use":
+          setAlert((prev) => {
+            return { ...prev, alert: true, message: "Email already in use" };
+          });
+          break;
+
+        case "auth/weak-password":
+          setAlert((prev) => {
+            return { ...prev, alert: true, message: "Weak password" };
+          });
+          break;
+        default: {
+          setAlert((prev) => {
+            return { ...prev, alert: true, message: "An error occured" };
+          });
+        }
       }
-    } catch {
-      console.log("An error occured");
-      setAlert((prev) => {
-        return {
-          ...prev,
-          alert: true,
-          message: "An error occurred, Please try again",
-        };
-      });
     }
   };
   const handleShowPassword = () => {
@@ -67,13 +122,18 @@ const Signup = () => {
       passwordField.type = "password";
     }
   };
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate("/");
+      }
+      setLoading(false);
+    });
+  }, [navigate]);
+
   if (loading) {
-    return (
-      <Loader
-        loading={loading}
-        description="We are creating your account, please wait"
-      />
-    );
+    return <Loader loading={loading} description="Loading" />;
   }
 
   return (
@@ -81,7 +141,7 @@ const Signup = () => {
       <div className="bg-white rounded  shadow-sm m-3 p-3">
         <Logo />
         {alert.alert && (
-          <div className="mx-auto" style={{ width: "340px" }}>
+          <div className="mx-auto">
             <div
               className="alert alert-danger alert-dismissible fade show"
               role="alert"
@@ -109,9 +169,21 @@ const Signup = () => {
               className="form-control"
               id="phone"
               placeholder="+256 712345678"
-              ref={phoneRef}
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                setPhoneError("");
+              }}
               required
             />
+            {phoneError && (
+              <div
+                className="text-danger small my-2"
+                style={{ fontSize: ".6em" }}
+              >
+                <span>{phoneError}</span>
+              </div>
+            )}
           </div>
           <div className="m-3">
             <label htmlFor="email" className="form-label">
@@ -121,10 +193,22 @@ const Signup = () => {
               type="email"
               className="form-control"
               id="email"
-              ref={emailRef}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError("");
+              }}
               placeholder="oen@example.com"
               required
             />
+            {emailError && (
+              <div
+                className="text-danger small my-2"
+                style={{ fontSize: ".6em" }}
+              >
+                <span>{emailError}</span>
+              </div>
+            )}
           </div>
           <div className="m-3">
             <label htmlFor="password" className="form-label">
@@ -134,9 +218,22 @@ const Signup = () => {
               type="password"
               className="form-control"
               id="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordError("");
+              }}
               ref={passwordRef}
               required
             />
+            {passwordError && (
+              <div
+                className="text-danger small my-2 muted"
+                style={{ fontSize: ".6em" }}
+              >
+                <span>{passwordError}</span>
+              </div>
+            )}
           </div>
           <div className="m-3 form-check">
             <input
@@ -153,14 +250,7 @@ const Signup = () => {
           <button
             type="submit"
             className="m-3 btn ridelink-background text-white "
-            onClick={(e) =>
-              handleSignup(
-                e,
-                phoneRef.current.value,
-                emailRef.current.value,
-                passwordRef.current.value
-              )
-            }
+            onClick={(e) => handleSignup(e)}
           >
             Create my account
           </button>

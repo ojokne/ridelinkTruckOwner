@@ -14,12 +14,11 @@ function App() {
       <Routes>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />
-        <Route element={<ProtectedRoutes />}>
-          <Route path="/" element={<Home />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="trucks" element={<Trucks />} />
-            <Route path="add_truck" element={<AddTruck />} />
-          </Route>
+        <Route element={<ProtectedRoutes />}></Route>
+        <Route path="/" element={<Home />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="trucks" element={<Trucks />} />
+          <Route path="add_truck" element={<AddTruck />} />
         </Route>
         <Route path="*" element={<p>Error page</p>} />
       </Routes>

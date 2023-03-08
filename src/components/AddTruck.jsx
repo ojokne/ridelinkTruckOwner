@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../config/firebase";
 import useId from "../utils/useId";
 import useToken from "../utils/useToken";
 import Loader from "./Loader";
@@ -7,7 +10,7 @@ const AddTruck = () => {
   const id = useId();
   const token = useToken();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [regNumber, setregNumber] = useState("");
   const [weight, setWeight] = useState("");
   const [alert, setAlert] = useState({
@@ -15,6 +18,7 @@ const AddTruck = () => {
     message: "",
     class: "",
   });
+  const navigate = useNavigate();
 
   const handleAddTruck = async (e) => {
     e.preventDefault();
@@ -81,6 +85,15 @@ const AddTruck = () => {
       });
     }
   };
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      setLoading(false);
+      if (!user) {
+        navigate("/login");
+      }
+    });
+  }, [navigate]);
 
   if (loading) {
     return (

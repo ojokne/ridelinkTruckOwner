@@ -1,55 +1,65 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Loader from "./Loader";
 import { FaTruckMoving } from "react-icons/fa";
 import { useData } from "../context/StateProvider";
 import { ACTIONS } from "../context/actions";
 import useId from "../utils/useId";
 import useToken from "../utils/useToken";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../config/firebase";
 
 const Dashboard = () => {
-  const id = useId();
-  const token = useToken();
   const { dataDispatch } = useData();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [trucks, setTrucks] = useState(0);
   const [trips, setTrips] = useState(0);
   const [data, setData] = useState({});
+  const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const res = await fetch(
+  //         `${process.env.REACT_APP_API_HOST}/truck_owner/trucks/${id}`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: token,
+  //           },
+  //         }
+  //       );
+  //       const data = await res.json();
+  //       setData(data.data);
+  //       dataDispatch({ type: ACTIONS.ADD_DATA, data: data.data });
+  //       if (data.data) {
+  //         setTrucks(data.data.length);
+  //         for (let i = 0; i < data.data.length; i++) {
+  //           let trips = data.data[i].trips;
+  //           setTrips((prev) => prev + trips.length);
+  //         }
+  //       }
+  //       setLoading(false);
+  //     } catch (e) {
+  //       console.log(e);
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [id, dataDispatch]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `${process.env.REACT_APP_API_HOST}/truck_owner/trucks/${id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: token,
-            },
-          }
-        );
-        const data = await res.json();
-        setData(data.data);
-        dataDispatch({ type: ACTIONS.ADD_DATA, data: data.data });
-        if (data.data) {
-          setTrucks(data.data.length);
-          for (let i = 0; i < data.data.length; i++) {
-            let trips = data.data[i].trips;
-            setTrips((prev) => prev + trips.length);
-          }
-        }
-        setLoading(false);
-      } catch (e) {
-        console.log(e);
-        setLoading(false);
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate("/login");
       }
-    };
-
-    fetchData();
-  }, [id, dataDispatch]);
+      setLoading(false);
+    });
+  }, [navigate]);
 
   if (loading) {
     return <Loader loading={loading} description="Please wait" />;
