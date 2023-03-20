@@ -1,14 +1,21 @@
+import { signOut } from "firebase/auth";
 import { FaSignOutAlt, FaTasks, FaTruckMoving } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { auth } from "../config/firebase";
 
 const MobileMenu = ({ handleShowMenu }) => {
   const navigate = useNavigate();
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    sessionStorage.clear();
-    navigate("/login");
+
+    try {
+      await signOut(auth);
+      navigate("/login");
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -27,7 +34,7 @@ const MobileMenu = ({ handleShowMenu }) => {
           </li>
         </Link>
 
-        <Link
+        {/* <Link
           className="text-decoration-none"
           to="trucks"
           onClick={() => handleShowMenu()}
@@ -38,7 +45,7 @@ const MobileMenu = ({ handleShowMenu }) => {
               <FaTruckMoving className="icon iconMenu" />
             </span>
           </li>
-        </Link>
+        </Link> */}
         <Link
           className="text-decoration-none"
           to="add_truck"

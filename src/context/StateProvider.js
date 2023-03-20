@@ -1,17 +1,17 @@
 import { createContext, useContext, useReducer } from "react";
-import { dataReducer } from "./dataReducer";
+import { truckReducer } from "./truckReducer";
 
-const DataContext = createContext();
+const TruckContext = createContext();
 
 export const StateProvider = ({ children }) => {
-  const [data, dataDispatch] = useReducer(dataReducer, {});
+  const [trucks, trucksDispatch] = useReducer(truckReducer, {});
   return (
-    <DataContext.Provider value={{ data, dataDispatch }}>
+    <TruckContext.Provider value={{ trucks, trucksDispatch }}>
       {children}
-    </DataContext.Provider>
+    </TruckContext.Provider>
   );
 };
 
-export const useData = () => {
-  return useContext(DataContext);
+export const useTrucks = () => {
+  return useContext(TruckContext);
 };

@@ -1,3 +1,3 @@
 export const ACTIONS = {
-  ADD_DATA: "Add data",
+  ADD_TRUCKS: "Add data",
 };

@@ -2,11 +2,12 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
 } from "firebase/auth";
+import { setDoc, doc } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import Logo from "../components/Logo";
-import { auth } from "../config/firebase";
+import { auth, db } from "../config/firebase";
 
 const Signup = () => {
   const showPasswordRef = useRef();
@@ -29,53 +30,13 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
 
-    // try {
-    //   const res = await fetch(
-    //     `${process.env.REACT_APP_API_HOST}/truck_owner/signup`,
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify({
-    //         phoneNumber,
-    //         email,
-    //         password,
-    //         role: 3,
-    //       }),
-    //     }
-    //   );
-    //   const data = await res.json();
-    //   setLoading(false);
-
-    //   if (data.isCreated) {
-    //     navigate("/login");
-    //     setAlert((prev) => {
-    //       return { ...prev, alert: false, message: "" };
-    //     });
-    //   } else {
-    //     setAlert((prev) => {
-    //       return { ...prev, alert: true, message: data.msg };
-    //     });
-    //   }
-    // } catch {
-    //   console.log("An error occured");
-    //   setAlert((prev) => {
-    //     return {
-    //       ...prev,
-    //       alert: true,
-    //       message: "An error occurred, Please try again",
-    //     };
-    //   });
-    // }
-
     if (phone.length < 10) {
       setPhoneError("Should be atleast 10 characters");
       return;
     }
 
     if (!email.length) {
-      setEmailError("Email cannot be empty");
+      setEmailError("Email is required");
       return;
     }
 
@@ -86,7 +47,12 @@ const Signup = () => {
 
     try {
       setLoading(true);
-      await createUserWithEmailAndPassword(auth, email, password);
+      let user = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, "eTruckOwners", user.user.uid), {
+        phone,
+        email,
+      });
+      console.log("Added");
       setLoading(false);
       navigate("/");
     } catch (e) {
@@ -123,14 +89,14 @@ const Signup = () => {
     }
   };
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigate("/");
-      }
-      setLoading(false);
-    });
-  }, [navigate]);
+  // useEffect(() => {
+  //   onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       navigate("/");
+  //     }
+  //     setLoading(false);
+  //   });
+  // }, [navigate]);
 
   if (loading) {
     return <Loader loading={loading} description="Loading" />;
@@ -256,7 +222,7 @@ const Signup = () => {
           </button>
         </form>
         <div className="mt-3">
-          <Link to="login" className="text-decoration-none ridelink-color">
+          <Link to="/login" className="text-decoration-none ridelink-color">
             Login to my account
           </Link>
         </div>

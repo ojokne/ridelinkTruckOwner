@@ -7,6 +7,8 @@ import Dashboard from "./components/Dashboard";
 import Home from "./pages/Home";
 import AddTruck from "./components/AddTruck";
 import Trucks from "./components/Trucks";
+import Available from "./components/Available";
+import Trip from "./components/Trip";
 
 function App() {
   return (
@@ -16,8 +18,11 @@ function App() {
         <Route path="signup" element={<Signup />} />
         <Route element={<ProtectedRoutes />}></Route>
         <Route path="/" element={<Home />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="trucks" element={<Trucks />} />
+          <Route path="/" element={<Dashboard />}>
+            <Route path="available" element={<Available />} />
+            <Route path="trip" element={<Trip />} />
+          </Route>
+          {/* <Route path="trucks" element={<Trucks />} /> */}
           <Route path="add_truck" element={<AddTruck />} />
         </Route>
         <Route path="*" element={<p>Error page</p>} />

@@ -1,89 +1,54 @@
 import { onAuthStateChanged } from "firebase/auth";
+import { addDoc, collection } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../config/firebase";
-import useId from "../utils/useId";
-import useToken from "../utils/useToken";
+import { auth, db } from "../config/firebase";
 import Loader from "./Loader";
 
 const AddTruck = () => {
-  const id = useId();
-  const token = useToken();
-
   const [loading, setLoading] = useState(true);
-  const [regNumber, setregNumber] = useState("");
-  const [weight, setWeight] = useState("");
+  const [regNumber, setRegNumber] = useState("");
+  const [weight, setWeight] = useState(0);
+
+  const [regNumberError, setRegNumberError] = useState("");
+  const [weightError, setWeightError] = useState();
   const [alert, setAlert] = useState({
     alert: false,
     message: "",
-    class: "",
   });
   const navigate = useNavigate();
 
   const handleAddTruck = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    if (id) {
-      try {
-        const res = await fetch(
-          `${process.env.REACT_APP_API_HOST}/truck_owner/add_truck/${id}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: token,
-            },
-            body: JSON.stringify({
-              regNumber,
-              weight,
-            }),
-          }
-        );
-        const data = await res.json();
-        setLoading(false);
 
-        if (data.isCreated) {
-          setAlert((prev) => {
-            return {
-              ...prev,
-              alert: true,
-              message: "Truck was successfully Added",
-              class: "alert alert-success alert-dismissible fade show",
-            };
-          });
-          setregNumber("");
-          setWeight("");
-        } else {
-          setAlert((prev) => {
-            return {
-              ...prev,
-              alert: true,
-              message: data.msg,
-              class: "alert alert-warning alert-dismissible fade show",
-            };
-          });
-        }
-      } catch (e) {
+    if (!regNumber.length) {
+      setRegNumberError("Registration Number is required");
+      return;
+    }
+    if (weight < 1) {
+      setWeightError("Weight should be atleast 1 tonne");
+      return;
+    }
+    setLoading(true);
+
+    addDoc(collection(db, "eTrucks"), {
+      regNumber,
+      weight,
+      isAvailable: true,
+      trips: 0,
+      truckOwnerId: auth.currentUser.uid,
+    })
+      .then((res) => {
+        navigate("/");
+        setLoading(false);
+      })
+      .catch((e) => {
         console.log(e);
         setAlert((prev) => {
-          return {
-            ...prev,
-            alert: true,
-            message: "An error occurred, Please try again",
-            class: "alert alert-danger alert-dismissible fade show",
-          };
+          return { ...prev, alert: true, message: "Could not add truck" };
         });
-      }
-    } else {
-      setAlert((prev) => {
-        return {
-          ...prev,
-          alert: true,
-          message: "You are not logged in",
-          class: "alert alert-warning alert-dismissible fade show",
-        };
+        setLoading(false);
       });
-    }
   };
 
   useEffect(() => {
@@ -96,12 +61,7 @@ const AddTruck = () => {
   }, [navigate]);
 
   if (loading) {
-    return (
-      <Loader
-        loading={loading}
-        description="We are adding your truck, please wait"
-      />
-    );
+    return <Loader loading={loading} description="Please wait" />;
   }
   return (
     <div>
@@ -111,7 +71,10 @@ const AddTruck = () => {
       <div className="mx-auto" style={{ maxWidth: "500px" }}>
         <div className="bg-white rounded  shadow-sm m-3 p-3">
           {alert.alert && (
-            <div className={alert.class} role="alert">
+            <div
+              className="alert alert-danger alert-dismissible fade show"
+              role="alert"
+            >
               {alert.message}
               <button
                 type="button"
@@ -135,8 +98,19 @@ const AddTruck = () => {
                   placeholder="UBA123X"
                   value={regNumber}
                   required
-                  onChange={(e) => setregNumber(e.target.value.toUpperCase())}
+                  onChange={(e) => {
+                    setRegNumber(e.target.value.toUpperCase());
+                    setRegNumberError("");
+                  }}
                 />
+                {regNumberError && (
+                  <div
+                    className="text-danger small my-2"
+                    style={{ fontSize: ".6em" }}
+                  >
+                    <span>{regNumberError}</span>
+                  </div>
+                )}
               </div>
               <div className="m-3">
                 <label htmlFor="weight" className="form-label">
@@ -149,8 +123,19 @@ const AddTruck = () => {
                   value={weight}
                   placeholder="12"
                   required
-                  onChange={(e) => setWeight(e.target.value)}
+                  onChange={(e) => {
+                    setWeight(e.target.value);
+                    setWeightError("");
+                  }}
                 />
+                {weightError && (
+                  <div
+                    className="text-danger small my-2"
+                    style={{ fontSize: ".6em" }}
+                  >
+                    <span>{weightError}</span>
+                  </div>
+                )}
               </div>
               <button
                 type="submit"

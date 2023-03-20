@@ -14,14 +14,14 @@ const DesktopMenu = () => {
           </li>
         </Link>
 
-        <Link className="text-decoration-none" to="trucks">
+        {/* <Link className="text-decoration-none" to="trucks">
           <li className="py-2 border-bottom liMenu">
             <span>
               <FaTruckMoving className="icon iconMenu" />
             </span>
             <span className="text-muted">Trucks</span>
           </li>
-        </Link>
+        </Link> */}
         <Link className="text-decoration-none" to="add_truck">
           <li className="py-2 border-bottom liMenu">
             <span>

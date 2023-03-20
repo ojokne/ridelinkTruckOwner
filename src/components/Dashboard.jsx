@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import Loader from "./Loader";
-import { FaTruckMoving } from "react-icons/fa";
-import { useData } from "../context/StateProvider";
+import { FaCheck } from "react-icons/fa";
+import { useTrucks } from "../context/StateProvider";
 import { ACTIONS } from "../context/actions";
-import useId from "../utils/useId";
-import useToken from "../utils/useToken";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { auth, db } from "../config/firebase";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 
 const Dashboard = () => {
-  const { dataDispatch } = useData();
+  const { trucksDispatch } = useTrucks();
   const [loading, setLoading] = useState(true);
-  const [trucks, setTrucks] = useState(0);
-  const [trips, setTrips] = useState(0);
+  const [available, setAvailable] = useState(0);
+  const [trip, setTrip] = useState(0);
   const [data, setData] = useState({});
+  const [display, setDisplay] = useState(false);
   const navigate = useNavigate();
 
   // useEffect(() => {
@@ -52,15 +52,69 @@ const Dashboard = () => {
   //   fetchData();
   // }, [id, dataDispatch]);
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        navigate("/login");
-      }
-      setLoading(false);
-    });
-  }, [navigate]);
+  // useEffect(() => {
+  //   onAuthStateChanged(auth, (user) => {
+  //     if (!user) {
+  //       navigate("/login");
+  //     }
+  //     setLoading(false);
+  //   });
+  // }, [navigate]);
 
+  useEffect(() => {
+    let unsubcribeFromFirestore;
+    const unsubcribeFromAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const querySnapShot = query(
+          collection(db, "eTrucks"),
+          "eTrucks",
+          where("truckOwnerId", "==", auth.currentUser.uid)
+        );
+        unsubcribeFromFirestore = onSnapshot(querySnapShot, (snapshot) => {
+          if (snapshot.empty) {
+            setDisplay(false);
+            setLoading(false);
+          } else {
+            for (let i = 0; i < snapshot.docs.length; i++) {
+              let truck = snapshot.docs[i].data();
+              if (truck.isAvailable) {
+                setAvailable((prev) => prev + 1);
+              } else {
+                setTrip((prev) => prev + 1);
+              }
+            }
+
+            let trucksArray = [];
+            for (let i = 0; i < snapshot.docs.length; i++) {
+              const truck = {
+                ...snapshot.docs[i].data(),
+                id: snapshot.docs[i].id,
+              };
+              trucksArray.push(truck);
+            }
+
+            trucksDispatch({ type: ACTIONS.ADD_TRUCKS, trucks: trucksArray });
+
+            setLoading(false);
+            setDisplay(true);
+          }
+        });
+      } else {
+        navigate("/login");
+        if (unsubcribeFromFirestore) {
+          unsubcribeFromFirestore();
+        }
+      }
+    });
+    return () => {
+      unsubcribeFromAuth();
+      setAvailable(0);
+      setTrip(0);
+      if (unsubcribeFromFirestore) {
+        unsubcribeFromFirestore();
+      }
+    };
+  }, [navigate]);
   if (loading) {
     return <Loader loading={loading} description="Please wait" />;
   }
@@ -71,7 +125,7 @@ const Dashboard = () => {
         <span>Dashboard</span>
       </div>
       <div className="d-flex justify-content-center align-items-center flex-wrap"></div>
-      {data.length > 0 && (
+      {display && (
         <div>
           <div className="d-flex justify-content-center align-items-center flex-wrap">
             <div
@@ -79,15 +133,27 @@ const Dashboard = () => {
               className="m-3 p-4 bg-white shadow-sm rounded"
             >
               <span className="text-muted" style={{ fontSize: "20px" }}>
-                Trucks
+                Trucks Available
               </span>
               <div className="d-flex align-items-center">
                 <span>
-                  <FaTruckMoving className="icon iconMenu me-3" />
+                  <FaCheck className="icon iconSmall" />
                 </span>
                 <span className="me-3" style={{ fontSize: "30px" }}>
-                  {trucks}
+                  {available}
                 </span>
+              </div>
+              <div className="mt-3">
+                {available > 0 ? (
+                  <Link
+                    to="available"
+                    className="text-decoration-none ridelink-color"
+                  >
+                    View available Trucks
+                  </Link>
+                ) : (
+                  <span className="text-muted">No orders delivered</span>
+                )}
               </div>
             </div>
             <div
@@ -95,21 +161,37 @@ const Dashboard = () => {
               className="m-3 p-4 bg-white shadow-sm rounded"
             >
               <span className="text-muted" style={{ fontSize: "20px" }}>
-                Trips
+                Trucks on Trips
               </span>
               <div className="d-flex align-items-center">
                 <span>
-                  <FaTruckMoving className="icon iconMenu me-3" />
+                  <FaCheck
+                    className="icon iconSmall"
+                    style={{ backgroundColor: "#ffc107" }}
+                  />
                 </span>
                 <span className="me-3" style={{ fontSize: "30px" }}>
-                  {trips}
+                  {trip}
                 </span>
+              </div>
+              <div className="mt-3">
+                {trip > 0 ? (
+                  <Link
+                    to="trip"
+                    className="text-decoration-none ridelink-color"
+                  >
+                    View trucks on trips
+                  </Link>
+                ) : (
+                  <span className="text-muted">No trucks on trips</span>
+                )}
               </div>
             </div>
           </div>
+          <Outlet />
         </div>
       )}
-      {!data.length > 0 && (
+      {!display && (
         <div className="m-3 p-3 bg-white shadow-sm rounded lead text-center">
           <p> You have not added any trucks</p>
           <p>
